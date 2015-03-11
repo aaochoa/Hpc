@@ -1,3 +1,7 @@
+//Matrix multiplication using Ints
+//Anderson Alberto Ochoa Estupiñan
+//Code: 1053823121
+
 #include<stdio.h>
 #include<iostream>
 #include<cstdlib>
