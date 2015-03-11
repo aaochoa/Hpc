@@ -12,7 +12,8 @@ using namespace std;
 void print(float *A, int n, int m)
 {
     for (int i=0; i<n; i++)
-    {  for (int j=0; j<m; j++)
+    {
+      for (int j=0; j<m; j++)
       {
         cout<<A[n*i+j]<<" | ";
       }
@@ -33,9 +34,9 @@ void fillMatrix (float *mat, float value, int n, int m)
 }
 
 //=====================================================================================
-//Secuential
+//sequential
 //Function used to multiply both matrices taking each matrix as a vector
-void multMatrixSecuential (float *h_matA, float *h_matB, float *h_matC, int n, int m, int o)
+void multMatrixsequential (float *h_matA, float *h_matB, float *h_matC, int n, int m, int o)
 {
   //Row*Width+Col to find the value in the given bidimensional index
   for (int i=0; i<n; i++)
@@ -191,11 +192,11 @@ int compareMatrix (float *A, float *B,int n, int m)
   {
     if (A[i]!=B[i])
     {
-      cout<<"## Secuential and Parallel results are NOT equal ##"<<endl;
+      cout<<"## sequential and Parallel results are NOT equal ##"<<endl;
       return 0;
     }
   }
-  cout<<"== Secuential and Parallel results are equal =="<<endl;
+  cout<<"== sequential and Parallel results are equal =="<<endl;
   return 0;
 }
 
@@ -205,7 +206,7 @@ int compareMatrix (float *A, float *B,int n, int m)
 int main()
 {
     clock_t start, finish;
-    double elapsedSecuential,elapsedParallel,elapsedParallelTiles,optimizationP,optimizationT;
+    double elapsedsequential,elapsedParallel,elapsedParallelTiles,optimizationP,optimizationT;
     int n=2;
     int m=4;
     int o=8;
@@ -223,10 +224,10 @@ int main()
     fillMatrix(matCPT,0,n,o);
 
     start = clock();
-    multMatrixSecuential(matA,matB,matCS,n,m,o);
+    multMatrixsequential(matA,matB,matCS,n,m,o);
     finish = clock();
-    elapsedSecuential = (((double) (finish - start)) / CLOCKS_PER_SEC );
-    cout<< "The secuential process took: " << elapsedSecuential << " seconds to execute "<< endl<< endl;
+    elapsedsequential = (((double) (finish - start)) / CLOCKS_PER_SEC );
+    cout<< "The sequential process took: " << elapsedsequential << " seconds to execute "<< endl<< endl;
 
     start = clock();
     multMatrixParallel(matA,matB,matCP,n,m,o);
@@ -240,10 +241,10 @@ int main()
     elapsedParallelTiles = (((double) (finish - start)) / CLOCKS_PER_SEC );
     cout<< "The parallel process using Tiles took: " << elapsedParallelTiles << " seconds to execute "<< endl<< endl;
 
-    optimizationP = elapsedSecuential/elapsedParallel;
+    optimizationP = elapsedsequential/elapsedParallel;
     cout<< "The acceleration we've got without using Tiles: " << optimizationP << "X" <<endl;
 
-    optimizationT = elapsedSecuential/elapsedParallelTiles;
+    optimizationT = elapsedsequential/elapsedParallelTiles;
     cout<< "The acceleration we've got using Tiles: " << optimizationT << "X" <<endl;
 
     cout<< "Comparing Serial vs Parallel result " <<endl;
