@@ -3,7 +3,7 @@
   #include<cuda.h>
   #include<iostream>
 
-  #define BLOCK_SIZE 1024
+  #define BLOCK_SIZE 1024 // Because it's just an array, 1 dimension
 
   using namespace std;
 
@@ -23,6 +23,17 @@
     for (int i=0; i<size; i++)
     {
       A[i] = value;
+    }
+  }
+
+  void resultCompare(float A, float  *B)
+  {
+    if(fabs(A-B[0]) < 0.1)
+    {
+      cout<<"Well Done"<<endl;
+    } else
+    {
+      cout<<"Not working"<<endl;
     }
   }
 
@@ -57,7 +68,6 @@
   {
     float * d_A;
     float * d_B;
-    float Blocksize=BLOCK_SIZE; // Block of 1Dim
 
     cudaMalloc((void**)&d_A,length*sizeof(float));
     cudaMalloc((void**)&d_B,length*sizeof(float));
@@ -69,13 +79,13 @@
 
     while(aux>1)
     {
-       dim3 dimBlock(Blocksize,1,1);
-       int grid=ceil(aux/Blocksize);
+       dim3 dimBlock(BLOCK_SIZE,1,1);
+       int grid=ceil(aux/BLOCK_SIZE);
   	 	 dim3 dimGrid(grid,1,1);
        reduceKernel<<<dimGrid,dimBlock>>>(d_A,d_B,aux);
        cudaDeviceSynchronize();
        cudaMemcpy(d_A,d_B,length*sizeof(float),cudaMemcpyDeviceToDevice);
-       aux=ceil(aux/Blocksize);
+       aux=ceil(aux/BLOCK_SIZE);
     }
 
     cudaMemcpy(B,d_B,length*sizeof(float),cudaMemcpyDeviceToHost);
@@ -92,25 +102,28 @@
    float *A = (float *) malloc(l * sizeof(float));
    float *B = (float *) malloc(l * sizeof(float));
 
-   fillVector(A,2,l);
-   fillVector(B,2,l);
+   fillVector(A,2.0,l);
+   fillVector(B,0.0,l);
 
    start = clock();
    float sum = serialVectorItemsAdd(A,l);
    finish = clock();
-   cout<< "the result is: " << sum << endl;
+   cout<< "The result is: " << sum << endl;
    elapsedSecuential = (((double) (finish - start)) / CLOCKS_PER_SEC );
    cout<< "The Secuential process took: " << elapsedSecuential << " seconds to execute "<< endl<< endl;
 
    start = clock();
    vectorItemsAdd(A,B,l);
    finish = clock();
-   cout<< "the result is: " << B[0] << endl;
+   cout<< "The result is: " << B[0] << endl;
    elapsedParallel = (((double) (finish - start)) / CLOCKS_PER_SEC );
    cout<< "The Parallel process took: " << elapsedParallel << " seconds to execute "<< endl<< endl;
 
    optimization = elapsedSecuential/elapsedParallel;
    cout<< "The acceleration we've got: " << optimization <<endl;
+
+   cout<< "============================================ "<<endl;
+   resultCompare(sum, B);
 
    free(A);
    free(B);
