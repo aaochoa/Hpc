@@ -3,11 +3,13 @@
   #include<cuda.h>
   #include<iostream>
 
+  #define BLOCK_SIZE 1024
+
   using namespace std;
 
-  int serialVectorItemsAdd (int *A, int size)
+  float serialVectorItemsAdd (float *A, int size)
   {
-    int sum=0;
+    float sum=0;
 
     for (int i = 0; i < size; i++)
     {
@@ -16,7 +18,7 @@
     return sum;
   }
 
-  void fillVector (int *A, int value, int size )
+  void fillVector (float *A, float value, int size )
   {
     for (int i=0; i<size; i++)
     {
@@ -25,13 +27,19 @@
   }
 
   //Parallel
-  __global__ void reduceKernel(int *g_idata, int *g_odata)
+  __global__ void reduceKernel(float *g_idata, float *g_odata, int length)
   {
-    extern __shared__ int sdata[];
+    extern __shared__ float sdata[];
     // each thread loads one element from global to shared mem
     unsigned int tid = threadIdx.x;
     unsigned int i = blockIdx.x*(blockDim.x*2) + threadIdx.x;
-    sdata[tid] = g_idata[i] + g_idata[i+blockDim.x];
+    if(i<length)
+    {
+      sdata[tid] = g_idata[i] + g_idata[i+blockDim.x];
+    }else
+    {
+    	sdata[tid] = 0.0;
+    }
     __syncthreads();
     // do reduction in shared mem
     for (unsigned int s=blockDim.x/2; s>0; s>>=1)
@@ -45,19 +53,65 @@
     if (tid == 0) g_odata[blockIdx.x] = sdata[0];
   }
 
-  void vectorItemsAdd(int *A, int size)
+  void vectorItemsAdd(float *A, float *B, int length)
   {
+    float * d_A;
+    float * d_B;
+    float Blocksize=BLOCK_SIZE; // Block of 1Dim
 
+    cudaMalloc((void**)&d_A,length*sizeof(float));
+    cudaMalloc((void**)&d_B,length*sizeof(float));
+
+    cudaMemcpy(d_A, A,length*sizeof(float),cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, B,length*sizeof(float),cudaMemcpyHostToDevice);
+
+    int aux=length;
+
+    while(aux>1)
+    {
+       dim3 dimBlock(Blocksize,1,1);
+       int grid=ceil(aux/Blocksize);
+  	 	 dim3 dimGrid(grid,1,1);
+       reduceKernel<<<dimGrid,dimBlock>>>(d_A,d_B,aux);
+       cudaDeviceSynchronize();
+       cudaMemcpy(d_A,d_B,length*sizeof(float),cudaMemcpyDeviceToDevice);
+       aux=ceil(aux/Blocksize);
+    }
+
+    cudaMemcpy(B,d_B,length*sizeof(float),cudaMemcpyDeviceToHost);
+
+    cudaFree(d_A);
+    cudaFree(d_B);
   }
 
-
- int main ()
- {
+  int main ()
+  {
    int l = 5;
-   int *A = (int *) malloc(l * sizeof(int));
+   clock_t start, finish;
+   double elapsedSecuential, elapsedParallel, optimization;
+   float *A = (float *) malloc(l * sizeof(float));
+   float *B = (float *) malloc(l * sizeof(float));
 
    fillVector(A,2,l);
-   int sum = serialVectorItemsAdd(A,l);
+   fillVector(B,2,l);
+
+   start = clock();
+   float sum = serialVectorItemsAdd(A,l);
+   finish = clock();
    cout<< "the result is: " << sum << endl;
-  free(A);
+   elapsedSecuential = (((double) (finish - start)) / CLOCKS_PER_SEC );
+   cout<< "The Secuential process took: " << elapsedSecuential << " seconds to execute "<< endl<< endl;
+
+   start = clock();
+   vectorItemsAdd(A,B,l);
+   finish = clock();
+   cout<< "the result is: " << B[0] << endl;
+   elapsedParallel = (((double) (finish - start)) / CLOCKS_PER_SEC );
+   cout<< "The Parallel process took: " << elapsedParallel << " seconds to execute "<< endl<< endl;
+
+   optimization = elapsedSecuential/elapsedParallel;
+   cout<< "The acceleration we've got: " << optimization <<endl;
+
+   free(A);
+   free(B);
   }
