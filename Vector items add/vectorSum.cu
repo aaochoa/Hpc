@@ -7,7 +7,7 @@
 
   using namespace std;
 
-  float serialVectorItemsAdd (float *A, int size)
+  float serialVectorItemsAdd (float *A, int length)
   {
     float sum=0;
 
@@ -18,7 +18,15 @@
     return sum;
   }
 
-  void fillVector (float *A, float value, int size )
+  void printVector (float *A, int length)
+  {
+    for (int i=0; i<size; i++)
+    {
+      cout<<A[i]<<" | ";
+    }
+  }
+
+  void fillVector (float *A, float value, int length)
   {
     for (int i=0; i<size; i++)
     {
