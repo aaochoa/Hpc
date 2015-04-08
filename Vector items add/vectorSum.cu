@@ -6,34 +6,38 @@
   #define BLOCK_SIZE 1024 // Because it's just an array, 1 dimension
 
   using namespace std;
-
+//====== Serial vector ADD =====================================================
   float serialVectorItemsAdd (float *A, int length)
   {
     float sum=0;
 
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < length; i++)
     {
       sum = sum + A[i];
     }
     return sum;
   }
 
+//====== Function made to print vector =========================================
   void printVector (float *A, int length)
   {
-    for (int i=0; i<size; i++)
+    for (int i=0; i<length; i++)
     {
       cout<<A[i]<<" | ";
     }
+    cout<<endl;
   }
 
+//====== Function made to fill the vector with some given value ================
   void fillVector (float *A, float value, int length)
   {
-    for (int i=0; i<size; i++)
+    for (int i=0; i<length; i++)
     {
       A[i] = value;
     }
   }
 
+//====== To compare both results parallel and serial ===========================
   void resultCompare(float A, float  *B)
   {
     if(fabs(A-B[0]) < 0.1)
@@ -45,6 +49,7 @@
     }
   }
 
+//======= Reduction kernel =====================================================
   //Parallel
   __global__ void reduceKernel(float *g_idata, float *g_odata, int length)
   {
@@ -72,13 +77,14 @@
     if (tid == 0) g_odata[blockIdx.x] = sdata[0];
   }
 
+//====== Function made to call the reduction kernel ============================
   void vectorItemsAdd(float *A, float *B, int length)
   {
     float * d_A;
     float * d_B;
 
-    cudaMalloc((void**)&d_A,length*sizeof(float));
-    cudaMalloc((void**)&d_B,length*sizeof(float));
+    cudaMalloc(&d_A,length*sizeof(float));
+    cudaMalloc(&d_B,length*sizeof(float));
 
     cudaMemcpy(d_A, A,length*sizeof(float),cudaMemcpyHostToDevice);
     cudaMemcpy(d_B, B,length*sizeof(float),cudaMemcpyHostToDevice);
@@ -97,14 +103,16 @@
     }
 
     cudaMemcpy(B,d_B,length*sizeof(float),cudaMemcpyDeviceToHost);
+    printVector(B,length);
 
     cudaFree(d_A);
     cudaFree(d_B);
   }
 
+//======= MAIN function ========================================================
   int main ()
   {
-   int l = 5;
+   int l = 4; //Vector's length
    clock_t start, finish;
    double elapsedSecuential, elapsedParallel, optimization;
    float *A = (float *) malloc(l * sizeof(float));
