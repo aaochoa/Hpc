@@ -1,0 +1,330 @@
+=> EXECUTION #0
+Matrix size= 1
+The result is: 1
+The Secuential process took: 0 seconds to execute
+
+The result is: 0
+The Parallel process took: 0.10861 seconds to execute
+
+The acceleration we've got: 0
+Not working
+============================================
+=> EXECUTION #1
+Matrix size= 2
+The result is: 2
+The Secuential process took: 0 seconds to execute
+
+The result is: 2
+The Parallel process took: 0.000308 seconds to execute
+
+The acceleration we've got: 0
+Well Done
+============================================
+=> EXECUTION #2
+Matrix size= 4
+The result is: 4
+The Secuential process took: 0 seconds to execute
+
+The result is: 4
+The Parallel process took: 0.000241 seconds to execute
+
+The acceleration we've got: 0
+Well Done
+============================================
+=> EXECUTION #3
+Matrix size= 8
+The result is: 8
+The Secuential process took: 0 seconds to execute
+
+The result is: 8
+The Parallel process took: 0.000256 seconds to execute
+
+The acceleration we've got: 0
+Well Done
+============================================
+=> EXECUTION #4
+Matrix size= 16
+The result is: 16
+The Secuential process took: 0 seconds to execute
+
+The result is: 16
+The Parallel process took: 0.000254 seconds to execute
+
+The acceleration we've got: 0
+Well Done
+============================================
+=> EXECUTION #5
+Matrix size= 32
+The result is: 32
+The Secuential process took: 0 seconds to execute
+
+The result is: 32
+The Parallel process took: 0.000273 seconds to execute
+
+The acceleration we've got: 0
+Well Done
+============================================
+=> EXECUTION #6
+Matrix size= 64
+The result is: 64
+The Secuential process took: 1e-06 seconds to execute
+
+The result is: 64
+The Parallel process took: 0.00025 seconds to execute
+
+The acceleration we've got: 0.004
+Well Done
+============================================
+=> EXECUTION #7
+Matrix size= 128
+The result is: 128
+The Secuential process took: 0 seconds to execute
+
+The result is: 128
+The Parallel process took: 0.000249 seconds to execute
+
+The acceleration we've got: 0
+Well Done
+============================================
+=> EXECUTION #8
+Matrix size= 256
+The result is: 256
+The Secuential process took: 1e-06 seconds to execute
+
+The result is: 256
+The Parallel process took: 0.000251 seconds to execute
+
+The acceleration we've got: 0.00398406
+Well Done
+============================================
+=> EXECUTION #9
+Matrix size= 512
+The result is: 512
+The Secuential process took: 1e-06 seconds to execute
+
+The result is: 512
+The Parallel process took: 0.00027 seconds to execute
+
+The acceleration we've got: 0.0037037
+Well Done
+============================================
+=> EXECUTION #10
+Matrix size= 1024
+The result is: 1024
+The Secuential process took: 2e-06 seconds to execute
+
+The result is: 1024
+The Parallel process took: 0.000274 seconds to execute
+
+The acceleration we've got: 0.00729927
+Well Done
+============================================
+=> EXECUTION #11
+Matrix size= 2048
+The result is: 2048
+The Secuential process took: 5e-06 seconds to execute
+
+The result is: 2048
+The Parallel process took: 0.0003 seconds to execute
+
+The acceleration we've got: 0.0166667
+Well Done
+============================================
+=> EXECUTION #12
+Matrix size= 4096
+The result is: 4096
+The Secuential process took: 9e-06 seconds to execute
+
+The result is: 4096
+The Parallel process took: 0.000313 seconds to execute
+
+The acceleration we've got: 0.028754
+Well Done
+============================================
+=> EXECUTION #13
+Matrix size= 8192
+The result is: 8192
+The Secuential process took: 1.9e-05 seconds to execute
+
+The result is: 8192
+The Parallel process took: 0.000323 seconds to execute
+
+The acceleration we've got: 0.0588235
+Well Done
+============================================
+=> EXECUTION #14
+Matrix size= 16384
+The result is: 16384
+The Secuential process took: 3.9e-05 seconds to execute
+
+The result is: 16384
+The Parallel process took: 0.000391 seconds to execute
+
+The acceleration we've got: 0.0997442
+Well Done
+============================================
+=> EXECUTION #15
+Matrix size= 32768
+The result is: 32768
+The Secuential process took: 7.7e-05 seconds to execute
+
+The result is: 32768
+The Parallel process took: 0.000465 seconds to execute
+
+The acceleration we've got: 0.165591
+Well Done
+============================================
+=> EXECUTION #16
+Matrix size= 65536
+The result is: 65536
+The Secuential process took: 0.000152 seconds to execute
+
+The result is: 65536
+The Parallel process took: 0.000636 seconds to execute
+
+The acceleration we've got: 0.238994
+Well Done
+============================================
+=> EXECUTION #17
+Matrix size= 131072
+The result is: 131072
+The Secuential process took: 0.000304 seconds to execute
+
+The result is: 131072
+The Parallel process took: 0.001164 seconds to execute
+
+The acceleration we've got: 0.261168
+Well Done
+============================================
+=> EXECUTION #18
+Matrix size= 262144
+The result is: 262144
+The Secuential process took: 0.000609 seconds to execute
+
+The result is: 262144
+The Parallel process took: 0.001585 seconds to execute
+
+The acceleration we've got: 0.384227
+Well Done
+============================================
+=> EXECUTION #19
+Matrix size= 524288
+The result is: 524288
+The Secuential process took: 0.001236 seconds to execute
+
+The result is: 524288
+The Parallel process took: 0.002627 seconds to execute
+
+The acceleration we've got: 0.470499
+Well Done
+============================================
+=> EXECUTION #20
+Matrix size= 1048576
+The result is: 1.04858e+06
+The Secuential process took: 0.002448 seconds to execute
+
+The result is: 1.04858e+06
+The Parallel process took: 0.004621 seconds to execute
+
+The acceleration we've got: 0.529755
+Well Done
+============================================
+=> EXECUTION #21
+Matrix size= 2097152
+The result is: 2.09715e+06
+The Secuential process took: 0.004902 seconds to execute
+
+The result is: 2.09715e+06
+The Parallel process took: 0.008712 seconds to execute
+
+The acceleration we've got: 0.562672
+Well Done
+============================================
+=> EXECUTION #22
+Matrix size= 4194304
+The result is: 4.1943e+06
+The Secuential process took: 0.009776 seconds to execute
+
+The result is: 4.1943e+06
+The Parallel process took: 0.016499 seconds to execute
+
+The acceleration we've got: 0.592521
+Well Done
+============================================
+=> EXECUTION #23
+Matrix size= 8388608
+The result is: 8.38861e+06
+The Secuential process took: 0.020048 seconds to execute
+
+The result is: 8.38861e+06
+The Parallel process took: 0.032523 seconds to execute
+
+The acceleration we've got: 0.616425
+Well Done
+============================================
+=> EXECUTION #24
+Matrix size= 16777216
+The result is: 1.67772e+07
+The Secuential process took: 0.039074 seconds to execute
+
+The result is: 1.67772e+07
+The Parallel process took: 0.063014 seconds to execute
+
+The acceleration we've got: 0.620084
+Well Done
+============================================
+=> EXECUTION #25
+Matrix size= 33554432
+The result is: 3.35544e+07
+The Secuential process took: 0.078218 seconds to execute
+
+The result is: 3.35544e+07
+The Parallel process took: 0.125649 seconds to execute
+
+The acceleration we've got: 0.622512
+Well Done
+============================================
+=> EXECUTION #26
+Matrix size= 67108864
+The result is: 6.71089e+07
+The Secuential process took: 0.156411 seconds to execute
+
+The result is: 6.71089e+07
+The Parallel process took: 0.250969 seconds to execute
+
+The acceleration we've got: 0.623228
+Well Done
+============================================
+=> EXECUTION #27
+Matrix size= 134217728
+The result is: 1.34218e+08
+The Secuential process took: 0.314073 seconds to execute
+
+The result is: 1.34218e+08
+The Parallel process took: 0.498146 seconds to execute
+
+The acceleration we've got: 0.630484
+Well Done
+============================================
+=> EXECUTION #28
+Matrix size= 268435456
+The result is: 2.68435e+08
+The Secuential process took: 0.627008 seconds to execute
+
+The result is: 2.68435e+08
+The Parallel process took: 0.998697 seconds to execute
+
+The acceleration we've got: 0.627826
+Well Done
+============================================
+=> EXECUTION #29
+Matrix size= 536870912
+The result is: 5.36871e+08
+The Secuential process took: 1.25314 seconds to execute
+
+The result is: 5.36871e+08
+The Parallel process took: 1.99959 seconds to execute
+
+The acceleration we've got: 0.626702
+Well Done
+============================================
