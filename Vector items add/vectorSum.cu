@@ -1,3 +1,4 @@
+  //============================================================================
   #include<cstdlib>
   #include<time.h>
   #include<cuda.h>
@@ -53,16 +54,15 @@
   //Parallel
   __global__ void reduceKernel(float *g_idata, float *g_odata, int length)
   {
-    extern __shared__ float sdata[];
+    __shared__ float sdata[BLOCK_SIZE];
     // each thread loads one element from global to shared mem
     unsigned int tid = threadIdx.x;
     unsigned int i = blockIdx.x*(blockDim.x*2) + threadIdx.x;
-    if(i<length)
-    {
+    if(i<l){
       sdata[tid] = g_idata[i] + g_idata[i+blockDim.x];
-    }else
+    } else
     {
-    	sdata[tid] = 0.0;
+      sdata[tid] = 0.0;
     }
     __syncthreads();
     // do reduction in shared mem
@@ -82,6 +82,7 @@
   {
     float * d_A;
     float * d_B;
+    float * algo = (float *) malloc(length * sizeof(float));
 
     cudaMalloc(&d_A,length*sizeof(float));
     cudaMalloc(&d_B,length*sizeof(float));
@@ -90,20 +91,18 @@
     cudaMemcpy(d_B, B,length*sizeof(float),cudaMemcpyHostToDevice);
 
     int aux=length;
-
     while(aux>1)
     {
        dim3 dimBlock(BLOCK_SIZE,1,1);
-       int grid=ceil(aux/BLOCK_SIZE);
+       int grid=ceil(aux/(float)BLOCK_SIZE);
   	 	 dim3 dimGrid(grid,1,1);
        reduceKernel<<<dimGrid,dimBlock>>>(d_A,d_B,aux);
        cudaDeviceSynchronize();
        cudaMemcpy(d_A,d_B,length*sizeof(float),cudaMemcpyDeviceToDevice);
-       aux=ceil(aux/BLOCK_SIZE);
+       aux=(ceil(aux/(float)BLOCK_SIZE)/2);
     }
 
     cudaMemcpy(B,d_B,length*sizeof(float),cudaMemcpyDeviceToHost);
-    printVector(B,length);
 
     cudaFree(d_A);
     cudaFree(d_B);
@@ -112,7 +111,7 @@
 //======= MAIN function ========================================================
   int main ()
   {
-   int l = 4; //Vector's length
+   int l = 41352; //Vector's length
    clock_t start, finish;
    double elapsedSecuential, elapsedParallel, optimization;
    float *A = (float *) malloc(l * sizeof(float));
