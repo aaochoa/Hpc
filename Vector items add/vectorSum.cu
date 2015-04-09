@@ -58,7 +58,7 @@
     // each thread loads one element from global to shared mem
     unsigned int tid = threadIdx.x;
     unsigned int i = blockIdx.x*(blockDim.x*2) + threadIdx.x;
-    if(i<l){
+    if(i<length){
       sdata[tid] = g_idata[i] + g_idata[i+blockDim.x];
     } else
     {
