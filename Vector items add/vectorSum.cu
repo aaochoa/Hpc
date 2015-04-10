@@ -3,7 +3,8 @@
 #include<time.h>
 #include<cuda.h>
 #include<iostream>
-#include<math.h>
+#include<math.h> //Included just to use the Power function
+
 #define BLOCK_SIZE 1024 // Because it's just an array, 1 dimension
 
 using namespace std;
@@ -41,7 +42,7 @@ void fillVector (double *A, double value, int length)
 //====== To compare both results parallel and serial ===========================
 void resultCompare(double A, double  *B)
 {
-  if(fabs(A-B[0]) < 0.1)
+  if(fabs(A-B[0]) < 0.1)// taking in count decimal precision
   {
     cout<<"Well Done"<<endl;
   } else
@@ -58,8 +59,11 @@ __global__ void reduceKernel(double *g_idata, double *g_odata, int length)
   // each thread loads one element from global to shared mem
   unsigned int tid = threadIdx.x;
   unsigned int i = blockIdx.x*blockDim.x + threadIdx.x;
+  //A better implementation that sadly doesn't worked
+  //unsigned int i = blockIdx.x*(blockDim.x*2) + threadIdx.x;
   if(i<length)
   {
+    //sdata[tid] = g_idata[i]+g_idata[i+blockDim.x];
     sdata[tid] = g_idata[i];
   } else
   {
@@ -84,9 +88,8 @@ __global__ void reduceKernel(double *g_idata, double *g_odata, int length)
 //====== Function made to call the reduction kernel ============================
 void vectorItemsAdd(double *A, double *B, int length)
 {
-  double * d_A;
+  double * d_A;//Device variables
   double * d_B;
-  double * algo = (double *) malloc(length * sizeof(double));
 
   cudaMalloc(&d_A,length*sizeof(double));
   cudaMalloc(&d_B,length*sizeof(double));
@@ -95,13 +98,15 @@ void vectorItemsAdd(double *A, double *B, int length)
   cudaMemcpy(d_B, B,length*sizeof(double),cudaMemcpyHostToDevice);
 
   int aux=length;
+
   while(aux>1)
   {
      dim3 dimBlock(BLOCK_SIZE,1,1);
-     int grid=ceil(aux/(double)BLOCK_SIZE);
+     int grid=ceil(aux/(double)BLOCK_SIZE); //Cast needed to make this work
       dim3 dimGrid(grid,1,1);
      reduceKernel<<<dimGrid,dimBlock>>>(d_A,d_B,aux);
      cudaDeviceSynchronize();
+     //We can compromise some performance doing this
      cudaMemcpy(d_A,d_B,length*sizeof(double),cudaMemcpyDeviceToDevice);
      aux=ceil(aux/(double)BLOCK_SIZE);
   }
@@ -113,20 +118,25 @@ void vectorItemsAdd(double *A, double *B, int length)
 }
 
 //======= MAIN function ========================================================
+
 int main ()
 {
- for(int i=0; i<=29;i++)//to execute the program many times
- {	cout<<"=> EXECUTION #"<<i<<endl;
-  	unsigned int l = pow(2,i); //Vector's length
+
+ for(int i=0; i<=29;i++)//to execute the program many times just to get all the test values
+ {
+    cout<<"=> EXECUTION #"<<i<<endl;
+  	unsigned int l = pow(2,i); //Vector's length, variable in every execution to get the tes values faster
   	cout<<"Matrix size= "<<l<<endl;
- 		clock_t start, finish;
+ 		clock_t start, finish; //Clock variables
  		double elapsedSecuential, elapsedParallel, optimization;
+
    	double *A = (double *) malloc(l * sizeof(double));
    	double *B = (double *) malloc(l * sizeof(double));
 
    fillVector(A,1.0,l);
    fillVector(B,0.0,l);
 
+   //========================= SERIAL ==========================================
    start = clock();
    double sum = serialVectorItemsAdd(A,l);
    finish = clock();
@@ -134,6 +144,7 @@ int main ()
    elapsedSecuential = (((double) (finish - start)) / CLOCKS_PER_SEC );
    cout<< "The Secuential process took: " << elapsedSecuential << " seconds to execute "<< endl<< endl;
 
+   //======================= PARALLEL ==========================================
    start = clock();
    vectorItemsAdd(A,B,l);
    finish = clock();
