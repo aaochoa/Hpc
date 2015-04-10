@@ -29,7 +29,7 @@
 </ul>
 <h2>Execution<br />
 (How it works)</h2>
-<p><img src="images/execution.png" alt="Execution" /></p>
+<p><img src="Images/execution.png" alt="Execution" /></p>
 <p>According to the presentation this isn&#8217;t the best way to approach this problem because in the first iteration half of the threads are idle but the <strong>Reduction #3</strong> is easier to understand and accomplishes all the requirements of this course.</p>
 <h2>Results</h2>
-<p><img src="images/results.png" alt="Results" /></p>
+<p><img src="Images/results.png" alt="Results" /></p>
