@@ -5,14 +5,15 @@
 #include<iostream>
 #include<math.h> //Included just to use the Power function
 
-using namespace std;
-
+#define BLOCK_SIZE 32
+#define TILE_SIZE 32
 #define MAX_MASK_WIDTH 10
 __constant__ float M[MAX_MASK_WIDTH];
-cudaMemcpyToSymbol(M, h_M, Mask_Width*sizeof(float));
+
+using namespace std;
 
 //====== Function made to print vector =========================================
-void printVector (double *A, int length)
+void printVector(float *A, int length)
 {
   for (int i=0; i<length; i++)
   {
@@ -22,7 +23,7 @@ void printVector (double *A, int length)
 }
 
 //====== Function made to fill the vector with some given value ================
-void fillVector (double *A, double value, int length)
+void fillVector(float *A, float value, int length)
 {
   for (int i=0; i<length; i++)
   {
@@ -30,8 +31,27 @@ void fillVector (double *A, double value, int length)
   }
 }
 
+//====== Serial Convolution ====================================================
+void serialConvolution(float *input, float *output, float *mask, int mask_length, int length)
+{
+  int start = 0;
+  float temp = 0.0;
+  for (int i = 0; i < length; i++)
+  {
+    for (int j = 0; j < mask_length; j++)
+    {
+      start = i - (mask_length / 2);
+      if (start + j >= 0 && start + j < length)
+        temp += input[start + j] * mask[j];
+    }
+    output[i] = temp;
+    temp = 0.0;
+  }
+}
+
+
 //====== Basic convolution kernel ==============================================
-__global__ void convolution_1D_basic_kernel(float *N, float *M, float *P,
+__global__ void convolutionBasicKernel(float *N, float *M, float *P,
  int Mask_Width, int Width)
  {
    int i = blockIdx.x*blockDim.x + threadIdx.x;
@@ -48,15 +68,7 @@ __global__ void convolution_1D_basic_kernel(float *N, float *M, float *P,
 }
 
 //====== Convolution kernel using constant memory and caching ==================
-//The main diference is that we don't need here to pass M to the function because
-//it's now in constant memory thanks to this lines
-//__constant__ float M[MAX_MASK_WIDTH];
-//cudaMemcpyToSymbol(M, h_M, Mask_Width*sizeof(float));
-//because the CUDA runtime knows that constant memory variables are not
-//modified during kernel execution, it directs the hardware to aggressively cache the
-//constant memory variables during kernel execution
-
-global__ void convolution_1D_basic_kernel(float *N, float *P, int Mask_Width,
+__global__ void convolutionKernelConstant(float *N, float *P, int Mask_Width,
  int Width)
  {
    int i = blockIdx.x*blockDim.x + threadIdx.x;
@@ -73,7 +85,7 @@ global__ void convolution_1D_basic_kernel(float *N, float *P, int Mask_Width,
 }
 
 //===== Tiled Convolution kernel using shared memory ===========================
-global__ void convolution_1D_basic_kernel(float *N, float *P, int Mask_Width,
+__global__ void convolutionKernelShared(float *N, float *P, int Mask_Width,
  int Width)
  {
    int i = blockIdx.x*blockDim.x + threadIdx.x;
@@ -102,31 +114,177 @@ global__ void convolution_1D_basic_kernel(float *N, float *P, int Mask_Width,
 }
 
 //====== A simplier tiled convolution kernel using shared memory and general cahching
-global__ void convolution_1D_basic_kernel(float *N, float *P, int Mask_Width,
+__global__ void convolutionKernelSharedSimplier(float *N, float *P, int Mask_Width,
  int Width)
+{
+ int i = blockIdx.x*blockDim.x + threadIdx.x;
+ __shared__ float N_ds[TILE_SIZE];
+ N_ds[threadIdx.x] = N[i];
+ __syncthreads();
+ int This_tile_start_point = blockIdx.x * blockDim.x;
+ int Next_tile_start_point = (blockIdx.x + 1) * blockDim.x;
+ int N_start_point = i - (Mask_Width/2);
+ float Pvalue = 0;
+ for (int j = 0; j < Mask_Width; j ++)
  {
-   int i = blockIdx.x*blockDim.x + threadIdx.x;
-   __shared__ float N_ds[TILE_SIZE];
-   N_ds[threadIdx.x] = N[i];
-   __syncthreads();
-   int This_tile_start_point = blockIdx.x * blockDim.x;
-   int Next_tile_start_point = (blockIdx.x + 1) * blockDim.x;
-   int N_start_point = i - (Mask_Width/2);
-   float Pvalue = 0;
-   for (int j = 0; j < Mask_Width; j ++)
+   int N_index = N_start_point + j;
+   if (N_index >= 0 && N_index < Width)
    {
-     int N_index = N_start_point + j;
-     if (N_index >= 0 && N_index < Width)
+     if ((N_index >= This_tile_start_point)
+     && (N_index < Next_tile_start_point))
      {
-       if ((N_index >= This_tile_start_point)
-       && (N_index < Next_tile_start_point))
-       {
-         Pvalue += N_ds[threadIdx.x+j-(Mask_Width/2)]*M[j];
-       } else
-       {
-         Pvalue += N[N_index] * M[j];
-       }
+       Pvalue += N_ds[threadIdx.x+j-(Mask_Width/2)]*M[j];
+     } else
+     {
+       Pvalue += N[N_index] * M[j];
      }
    }
-   P[i] = Pvalue;
-  }
+ }
+ P[i] = Pvalue;
+}
+
+
+//===== Convolution kernel call ================================================
+void convolutionCall (float *input, float *output, float *mask, int mask_length, int length)
+{
+  float *d_input;
+  float *d_mask;
+  float *d_output;
+  float block_size = BLOCK_SIZE;//The compiler doesn't let me cast the variable
+
+  cudaMalloc(&d_input, length * sizeof(float));
+  cudaMalloc(&d_mask, mask_length * sizeof(float));
+  cudaMalloc(&d_output, length * sizeof(float));
+
+  cudaMemcpy (d_input, input, length * sizeof (float), cudaMemcpyHostToDevice);
+  cudaMemcpy (d_mask, mask, mask_length * sizeof (float), cudaMemcpyHostToDevice);
+
+  dim3 dimGrid (ceil (length / block_size), 1, 1);
+  dim3 dimBlock (block_size, 1, 1);
+
+  convolutionBasicKernel<<<dimGrid, dimBlock>>> (d_input, d_mask, d_output, mask_length, length);
+  cudaDeviceSynchronize();
+
+  cudaMemcpy (output, d_output, length * sizeof (float), cudaMemcpyDeviceToHost);
+  cudaFree (d_input);
+  cudaFree (d_mask);
+  cudaFree (d_output);
+}
+
+//==============================================================================
+void convolutionCallWithTiles (float *input, float *output, float *mask, int mask_length, int length)
+{
+  float *d_input;
+  float *d_output;
+  float block_size = BLOCK_SIZE;//The compiler doesn't let me cast the variable
+
+  cudaMalloc(&d_input, length * sizeof(float));
+  cudaMalloc(&d_output, length * sizeof(float));
+
+  cudaMemcpy (d_input, input, length * sizeof (float), cudaMemcpyHostToDevice);
+  cudaMemcpyToSymbol (M, mask, mask_length * sizeof (float));
+
+  dim3 dimGrid (ceil (length / block_size), 1, 1);
+  dim3 dimBlock (block_size, 1, 1);
+
+  convolutionKernelSharedSimplier<<<dimGrid, dimBlock>>> (d_input,d_output, mask_length, length);
+  cudaDeviceSynchronize();
+
+  cudaMemcpy (output, d_output, length * sizeof (float), cudaMemcpyDeviceToHost);
+  cudaFree (d_input);
+  cudaFree (d_output);
+}
+
+//==============================================================================
+void convolutionCallConstant (float *input, float *output, float *mask, int mask_length, int length)
+{
+  float *d_input;
+  float *d_output;
+  float block_size = BLOCK_SIZE;//The compiler doesn't let me cast the variable
+
+  cudaMalloc(&d_input, length * sizeof(float));
+  cudaMalloc(&d_output, length * sizeof(float));
+
+  cudaMemcpy (d_input, input, length * sizeof (float), cudaMemcpyHostToDevice);
+  cudaMemcpyToSymbol (M, mask, mask_length * sizeof (float));
+
+  dim3 dimGrid (ceil (length / block_size), 1, 1);
+  dim3 dimBlock (block_size, 1, 1);
+
+  convolutionKernelConstant<<<dimGrid, dimBlock>>> (d_input,d_output, mask_length, length);
+  cudaDeviceSynchronize();
+
+  cudaMemcpy (output, d_output, length * sizeof (float), cudaMemcpyDeviceToHost);
+  cudaFree (d_input);
+  cudaFree (d_output);
+}
+
+//==============================================================================
+void convolutionCallWithTilesComplex (float *input, float *output, float *mask, int mask_length, int length)
+{
+  float *d_input;
+  float *d_output;
+  float block_size = BLOCK_SIZE;//The compiler doesn't let me cast the variable
+
+  cudaMalloc(&d_input, length * sizeof(float));
+  cudaMalloc(&d_output, length * sizeof(float));
+
+  cudaMemcpy (d_input, input, length * sizeof (float), cudaMemcpyHostToDevice);
+  cudaMemcpyToSymbol (M, mask, mask_length * sizeof (float));
+
+  dim3 dimGrid (ceil (length / block_size), 1, 1);
+  dim3 dimBlock (block_size, 1, 1);
+
+  convolutionKernelShared<<<dimGrid, dimBlock>>> (d_input,d_output, mask_length, length);
+  cudaDeviceSynchronize();
+
+  cudaMemcpy (output, d_output, length * sizeof (float), cudaMemcpyDeviceToHost);
+  cudaFree (d_input);
+  cudaFree (d_output);
+}
+
+int main ()
+{
+  int length = 10;
+  int mask_length = 5;
+  float *A = (float *) malloc(length * sizeof(float));
+  float *mask = (float *) malloc(mask_length * sizeof(float));
+  float *Cserial = (float *) malloc(length * sizeof(float));
+  float *Cparallel = (float *) malloc(length * sizeof(float));
+  float *CparallelWithTiles = (float *) malloc(length * sizeof(float));
+  float *CparallelConstant = (float *) malloc (length * sizeof(float));
+  float *CparallelWithTilesComplex = (float *) malloc(length * sizeof(float));
+
+  fillVector(A,1,length);
+  fillVector(mask,2,mask_length);
+  fillVector(Cserial,0,length);
+  fillVector(Cparallel,0,length);
+
+  serialConvolution(A,Cserial,mask,mask_length,length);
+	cout<<"Serial result"<<endl;
+  printVector(Cserial,length);
+
+  convolutionCall(A,Cparallel,mask,mask_length,length);
+  cout<<"Parallel result"<<endl;
+  printVector(Cparallel,length);
+
+  convolutionCallConstant(A,CparallelConstant,mask,mask_length,length);
+  cout<<"Parallel with constant memory"<<endl;
+  printVector(CparallelConstant,length);
+
+  convolutionCallWithTiles(A,CparallelWithTiles,mask,mask_length,length);
+  cout<<"Parallel with shared memory result"<<endl;
+  printVector(CparallelWithTiles,length);
+
+  convolutionCallWithTilesComplex(A,CparallelWithTilesComplex,mask,mask_length,length);
+  cout<<"Parallel with shared memory result"<<endl;
+  printVector(CparallelWithTiles,length);
+
+  free(A);
+  free(mask);
+  free(Cserial);
+  free(Cparallel);
+  free(CparallelWithTiles);
+  free(CparallelConstant);
+  free(CparallelWithTilesComplex);
+}
