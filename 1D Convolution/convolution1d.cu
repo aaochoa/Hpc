@@ -31,6 +31,19 @@ void fillVector(float *A, float value, int length)
   }
 }
 
+//====== Compare results =======================================================
+void compareVector (float *A, float *B,int n)
+{
+  for (int i=0; i<n; i++ )
+  {
+    if (A[i]!=B[i])
+    {
+      cout<<"## Secuential and Parallel results are NOT equal ##"<<endl;
+    }
+  }
+  cout<<"== Secuential and Parallel results are equal =="<<endl;
+}
+
 //====== Serial Convolution ====================================================
 void serialConvolution(float *input, float *output, float *mask, int mask_length, int length)
 {
@@ -172,30 +185,6 @@ void convolutionCall (float *input, float *output, float *mask, int mask_length,
 }
 
 //==============================================================================
-void convolutionCallWithTiles (float *input, float *output, float *mask, int mask_length, int length)
-{
-  float *d_input;
-  float *d_output;
-  float block_size = BLOCK_SIZE;//The compiler doesn't let me cast the variable
-
-  cudaMalloc(&d_input, length * sizeof(float));
-  cudaMalloc(&d_output, length * sizeof(float));
-
-  cudaMemcpy (d_input, input, length * sizeof (float), cudaMemcpyHostToDevice);
-  cudaMemcpyToSymbol (M, mask, mask_length * sizeof (float));
-
-  dim3 dimGrid (ceil (length / block_size), 1, 1);
-  dim3 dimBlock (block_size, 1, 1);
-
-  convolutionKernelSharedSimplier<<<dimGrid, dimBlock>>> (d_input,d_output, mask_length, length);
-  cudaDeviceSynchronize();
-
-  cudaMemcpy (output, d_output, length * sizeof (float), cudaMemcpyDeviceToHost);
-  cudaFree (d_input);
-  cudaFree (d_output);
-}
-
-//==============================================================================
 void convolutionCallConstant (float *input, float *output, float *mask, int mask_length, int length)
 {
   float *d_input;
@@ -243,10 +232,36 @@ void convolutionCallWithTilesComplex (float *input, float *output, float *mask, 
   cudaFree (d_output);
 }
 
+//====== Convolution kernel call tiled version (the simplified one) ============
+void convolutionCallWithTiles (float *input, float *output, float *mask, int mask_length, int length)
+{
+  float *d_input;
+  float *d_output;
+  float block_size = BLOCK_SIZE;//The compiler doesn't let me cast the variable
+
+  cudaMalloc(&d_input, length * sizeof(float));
+  cudaMalloc(&d_output, length * sizeof(float));
+
+  cudaMemcpy (d_input, input, length * sizeof (float), cudaMemcpyHostToDevice);
+  cudaMemcpyToSymbol (M, mask, mask_length * sizeof (float));
+
+  dim3 dimGrid (ceil (length / block_size), 1, 1);
+  dim3 dimBlock (block_size, 1, 1);
+
+  convolutionKernelSharedSimplier<<<dimGrid, dimBlock>>> (d_input,d_output, mask_length, length);
+  cudaDeviceSynchronize();
+
+  cudaMemcpy (output, d_output, length * sizeof (float), cudaMemcpyDeviceToHost);
+  cudaFree (d_input);
+  cudaFree (d_output);
+}
+
 int main ()
 {
   int length = 10;
   int mask_length = 5;
+  clock_t start, finish; //Clock variables
+  double elapsedSecuential, elapsedParallel, elapsedParallelConstant, elapsedParallelSharedComplex,elapsedParallelSharedTiles, optimization;
   float *A = (float *) malloc(length * sizeof(float));
   float *mask = (float *) malloc(mask_length * sizeof(float));
   float *Cserial = (float *) malloc(length * sizeof(float));
@@ -259,26 +274,58 @@ int main ()
   fillVector(mask,2,mask_length);
   fillVector(Cserial,0,length);
   fillVector(Cparallel,0,length);
+  fillVector(CparallelWithTiles,0,length);
+  fillVector(CparallelConstant,0,length);
+  fillVector(CparallelWithTilesComplex,0,length);
 
+  //============================================================================
+  cout<<"Serial result"<<endl;
+  start = clock();
   serialConvolution(A,Cserial,mask,mask_length,length);
-	cout<<"Serial result"<<endl;
-  printVector(Cserial,length);
+  finish = clock();
+  elapsedSecuential = (((double) (finish - start)) / CLOCKS_PER_SEC );
+  cout<< "The Secuential process took: " << elapsedSecuential << " seconds to execute "<< endl<< endl;
+  //printVector(Cserial,length);
 
-  convolutionCall(A,Cparallel,mask,mask_length,length);
+  //============================================================================
   cout<<"Parallel result"<<endl;
-  printVector(Cparallel,length);
+  start = clock();
+  convolutionCall(A,Cparallel,mask,mask_length,length);
+  finish = clock();
+  elapsedParallel = (((double) (finish - start)) / CLOCKS_PER_SEC );
+  cout<< "The Secuential process took: " << elapsedParallel << " seconds to execute "<< endl<< endl;
+  //printVector(Cparallel,length);
+  compareVector(Cserial,Cparallel,length);
 
-  convolutionCallConstant(A,CparallelConstant,mask,mask_length,length);
+  //============================================================================
   cout<<"Parallel with constant memory"<<endl;
-  printVector(CparallelConstant,length);
+  start = clock();
+  convolutionCallConstant(A,CparallelConstant,mask,mask_length,length);
+  finish = clock();
+  elapsedParallelConstant = (((double) (finish - start)) / CLOCKS_PER_SEC );
+  cout<< "The Secuential process took: " << elapsedParallelConstant << " seconds to execute "<< endl<< endl;
+  //printVector(CparallelConstant,length);
+  compareVector(Cserial,CparallelConstant,length);
 
-  convolutionCallWithTiles(A,CparallelWithTiles,mask,mask_length,length);
+  //============================================================================
   cout<<"Parallel with shared memory result"<<endl;
-  printVector(CparallelWithTiles,length);
-
+  start = clock();
   convolutionCallWithTilesComplex(A,CparallelWithTilesComplex,mask,mask_length,length);
-  cout<<"Parallel with shared memory result"<<endl;
-  printVector(CparallelWithTiles,length);
+  finish = clock();
+  elapsedParallelSharedComplex = (((double) (finish - start)) / CLOCKS_PER_SEC );
+  cout<< "The Secuential process took: " << elapsedParallelSharedComplex << " seconds to execute "<< endl<< endl;
+  //printVector(CparallelWithTilesComplex,length);
+  compareVector(Cserial,CparallelWithTilesComplex,length);
+
+  //============================================================================
+  cout<<"Parallel with shared memory result simplified"<<endl;
+  start = clock();
+  convolutionCallWithTiles(A,CparallelWithTiles,mask,mask_length,length);
+  finish = clock();
+  elapsedParallelSharedTiles = (((double) (finish - start)) / CLOCKS_PER_SEC );
+  cout<< "The Secuential process took: " << elapsedParallelSharedTiles << " seconds to execute "<< endl<< endl;
+  //printVector(CparallelWithTiles,length);
+  compareVector(Cserial,CparallelWithTiles,length);
 
   free(A);
   free(mask);
