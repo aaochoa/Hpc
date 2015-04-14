@@ -262,7 +262,7 @@ int main ()
   for(int i=0; i<=29;i++)//to execute the program many times just to get all the test values
   {
     cout<<"=> EXECUTION #"<<i<<endl;
-    int length = pow(2,i);
+    unsigned int length = pow(2,i);
     int mask_length = 5;
     int op = 1; //To select which parallel version we want to execute
     //1 basic parallel - 2 parallel with constant memory
