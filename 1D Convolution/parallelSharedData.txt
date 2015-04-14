@@ -1,0 +1,308 @@
+=> EXECUTION #0
+Serial result
+The Secuential process took: 1e-06 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.124101 seconds to execute
+The acceleration we've got: 8.05795e-06
+## Secuential and Parallel results are NOT equal ##
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #1
+Serial result
+The Secuential process took: 0 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.000278 seconds to execute
+The acceleration we've got: 0
+## Secuential and Parallel results are NOT equal ##
+## Secuential and Parallel results are NOT equal ##
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #2
+Serial result
+The Secuential process took: 1e-06 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.000267 seconds to execute
+The acceleration we've got: 0.00374532
+## Secuential and Parallel results are NOT equal ##
+## Secuential and Parallel results are NOT equal ##
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #3
+Serial result
+The Secuential process took: 0 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.00026 seconds to execute
+The acceleration we've got: 0
+## Secuential and Parallel results are NOT equal ##
+## Secuential and Parallel results are NOT equal ##
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #4
+Serial result
+The Secuential process took: 1e-06 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.000267 seconds to execute
+The acceleration we've got: 0.00374532
+## Secuential and Parallel results are NOT equal ##
+## Secuential and Parallel results are NOT equal ##
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #5
+Serial result
+The Secuential process took: 2e-06 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.000258 seconds to execute
+The acceleration we've got: 0.00775194
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #6
+Serial result
+The Secuential process took: 2e-06 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.000257 seconds to execute
+The acceleration we've got: 0.0077821
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #7
+Serial result
+The Secuential process took: 4e-06 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.000254 seconds to execute
+The acceleration we've got: 0.015748
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #8
+Serial result
+The Secuential process took: 8e-06 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.000256 seconds to execute
+The acceleration we've got: 0.03125
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #9
+Serial result
+The Secuential process took: 1.6e-05 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.000255 seconds to execute
+The acceleration we've got: 0.0627451
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #10
+Serial result
+The Secuential process took: 2.7e-05 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.000248 seconds to execute
+The acceleration we've got: 0.108871
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #11
+Serial result
+The Secuential process took: 4.8e-05 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.000258 seconds to execute
+The acceleration we've got: 0.186047
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #12
+Serial result
+The Secuential process took: 8.7e-05 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.000261 seconds to execute
+The acceleration we've got: 0.333333
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #13
+Serial result
+The Secuential process took: 0.000165 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.000272 seconds to execute
+The acceleration we've got: 0.606618
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #14
+Serial result
+The Secuential process took: 0.000322 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.000293 seconds to execute
+The acceleration we've got: 1.09898
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #15
+Serial result
+The Secuential process took: 0.000616 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.000321 seconds to execute
+The acceleration we've got: 1.919
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #16
+Serial result
+The Secuential process took: 0.001265 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.000386 seconds to execute
+The acceleration we've got: 3.2772
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #17
+Serial result
+The Secuential process took: 0.00247 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.000513 seconds to execute
+The acceleration we've got: 4.81481
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #18
+Serial result
+The Secuential process took: 0.005034 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.000978 seconds to execute
+The acceleration we've got: 5.14724
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #19
+Serial result
+The Secuential process took: 0.010108 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.001439 seconds to execute
+The acceleration we've got: 7.02432
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #20
+Serial result
+The Secuential process took: 0.020119 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.002139 seconds to execute
+The acceleration we've got: 9.4058
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #21
+Serial result
+The Secuential process took: 0.040274 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.003791 seconds to execute
+The acceleration we've got: 10.6236
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #22
+Serial result
+The Secuential process took: 0.080475 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.006689 seconds to execute
+The acceleration we've got: 12.0309
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #23
+Serial result
+The Secuential process took: 0.160996 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.012518 seconds to execute
+The acceleration we've got: 12.8612
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #24
+Serial result
+The Secuential process took: 0.322226 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.02406 seconds to execute
+The acceleration we've got: 13.3926
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #25
+Serial result
+The Secuential process took: 0.644556 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.047302 seconds to execute
+The acceleration we've got: 13.6264
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #26
+Serial result
+The Secuential process took: 1.28979 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.094173 seconds to execute
+The acceleration we've got: 13.696
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #27
+Serial result
+The Secuential process took: 2.58004 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.186226 seconds to execute
+The acceleration we've got: 13.8543
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #28
+Serial result
+The Secuential process took: 5.16349 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.372029 seconds to execute
+The acceleration we've got: 13.8793
+== Secuential and Parallel results are equal ==
+
+=> EXECUTION #29
+Serial result
+The Secuential process took: 10.3412 seconds to execute
+
+===============================================================
+Parallel with shared memory result
+The parallel process took: 0.743993 seconds to execute
+The acceleration we've got: 13.8995
+== Secuential and Parallel results are equal ==
