@@ -259,110 +259,114 @@ void convolutionCallWithTiles (float *input, float *output, float *mask, int mas
 //================= MAIN =======================================================
 int main ()
 {
-  int length = 10;
-  int mask_length = 5;
-  int op = 1; //To select which parallel version we want to execute
-  //1 basic parallel - 2 parallel with constant memory
-  //3 parallel with shared memory - 4 parallel with shared memory simplified
-  clock_t start, finish; //Clock variables
-  double elapsedSecuential, elapsedParallel, elapsedParallelConstant,
-  elapsedParallelSharedComplex,elapsedParallelSharedTiles, optimization;
-
-  float *A = (float *) malloc(length * sizeof(float));
-  float *mask = (float *) malloc(mask_length * sizeof(float));
-  float *Cserial = (float *) malloc(length * sizeof(float));
-  float *Cparallel = (float *) malloc(length * sizeof(float));
-  float *CparallelWithTiles = (float *) malloc(length * sizeof(float));
-  float *CparallelConstant = (float *) malloc (length * sizeof(float));
-  float *CparallelWithTilesComplex = (float *) malloc(length * sizeof(float));
-
-  fillVector(A,1,length);
-  fillVector(mask,2,mask_length);
-  fillVector(Cserial,0,length);
-  fillVector(Cparallel,0,length);
-  fillVector(CparallelWithTiles,0,length);
-  fillVector(CparallelConstant,0,length);
-  fillVector(CparallelWithTilesComplex,0,length);
-
-  //============================================================================
-  cout<<"Serial result"<<endl;
-  start = clock();
-  serialConvolution(A,Cserial,mask,mask_length,length);
-  finish = clock();
-  elapsedSecuential = (((double) (finish - start)) / CLOCKS_PER_SEC );
-  cout<< "The Secuential process took: " << elapsedSecuential << " seconds to execute "<< endl;
-  //printVector(Cserial,length);
-  cout<<endl;
-
-  //============================================================================
-  switch (op)
+  for(int i=0; i<=29;i++)//to execute the program many times just to get all the test values
   {
-    case 1:
-            cout<<"==============================================================="<<endl;
-            cout<<"Parallel result"<<endl;
-            start = clock();
-            convolutionCall(A,Cparallel,mask,mask_length,length);
-            finish = clock();
-            elapsedParallel = (((double) (finish - start)) / CLOCKS_PER_SEC );
-            cout<< "The parallel process took: " << elapsedParallel << " seconds to execute "<< endl;
-            optimization = elapsedSecuential/elapsedParallel;
-            cout<< "The acceleration we've got: " << optimization <<endl;
-            //printVector(Cparallel,length);
-            compareVector(Cserial,Cparallel,length);
-            cout<<endl;
-            break;
+    cout<<"=> EXECUTION #"<<i<<endl;
+    int length = pow(2,i);
+    int mask_length = 5;
+    int op = 1; //To select which parallel version we want to execute
+    //1 basic parallel - 2 parallel with constant memory
+    //3 parallel with shared memory - 4 parallel with shared memory simplified
+    clock_t start, finish; //Clock variables
+    double elapsedSecuential, elapsedParallel, elapsedParallelConstant,
+    elapsedParallelSharedComplex,elapsedParallelSharedTiles, optimization;
 
-    case 2:
-            cout<<"==============================================================="<<endl;
-            cout<<"Parallel with constant memory"<<endl;
-            start = clock();
-            convolutionCallConstant(A,CparallelConstant,mask,mask_length,length);
-            finish = clock();
-            elapsedParallelConstant = (((double) (finish - start)) / CLOCKS_PER_SEC );
-            cout<< "The parallel process took: " << elapsedParallelConstant << " seconds to execute "<< endl;
-            optimization = elapsedSecuential/elapsedParallelConstant;
-            cout<< "The acceleration we've got: " << optimization <<endl;
-            //printVector(CparallelConstant,length);
-            compareVector(Cserial,CparallelConstant,length);
-            cout<<endl;
-            break;
+    float *A = (float *) malloc(length * sizeof(float));
+    float *mask = (float *) malloc(mask_length * sizeof(float));
+    float *Cserial = (float *) malloc(length * sizeof(float));
+    float *Cparallel = (float *) malloc(length * sizeof(float));
+    float *CparallelWithTiles = (float *) malloc(length * sizeof(float));
+    float *CparallelConstant = (float *) malloc (length * sizeof(float));
+    float *CparallelWithTilesComplex = (float *) malloc(length * sizeof(float));
 
-    case 3:
-            cout<<"==============================================================="<<endl;
-            cout<<"Parallel with shared memory result"<<endl;
-            start = clock();
-            convolutionCallWithTilesComplex(A,CparallelWithTilesComplex,mask,mask_length,length);
-            finish = clock();
-            elapsedParallelSharedComplex = (((double) (finish - start)) / CLOCKS_PER_SEC );
-            cout<< "The parallel process took: " << elapsedParallelSharedComplex << " seconds to execute "<< endl;
-            optimization = elapsedSecuential/elapsedParallelSharedComplex;
-            cout<< "The acceleration we've got: " << optimization <<endl;
-            //printVector(CparallelWithTilesComplex,length);
-            compareVector(Cserial,CparallelWithTilesComplex,length);
-            cout<<endl;
-            break;
-    case 4:
-            cout<<"==============================================================="<<endl;
-            cout<<"Parallel with shared memory result simplified"<<endl;
-            start = clock();
-            convolutionCallWithTiles(A,CparallelWithTiles,mask,mask_length,length);
-            finish = clock();
-            elapsedParallelSharedTiles = (((double) (finish - start)) / CLOCKS_PER_SEC );
-            cout<< "The parallel process took: " << elapsedParallelSharedTiles << " seconds to execute "<< endl;
-            optimization = elapsedSecuential/elapsedParallelSharedTiles;
-            cout<< "The acceleration we've got: " << optimization <<endl;
-            //printVector(CparallelWithTiles,length);
-            compareVector(Cserial,CparallelWithTiles,length);
-            cout<<endl;
-            break;
+    fillVector(A,1.0,length);
+    fillVector(mask,2.0,mask_length);
+    fillVector(Cserial,0.0,length);
+    fillVector(Cparallel,0.0,length);
+    fillVector(CparallelWithTiles,0.0,length);
+    fillVector(CparallelConstant,0.0,length);
+    fillVector(CparallelWithTilesComplex,0.0,length);
+
+    //============================================================================
+    cout<<"Serial result"<<endl;
+    start = clock();
+    serialConvolution(A,Cserial,mask,mask_length,length);
+    finish = clock();
+    elapsedSecuential = (((double) (finish - start)) / CLOCKS_PER_SEC );
+    cout<< "The Secuential process took: " << elapsedSecuential << " seconds to execute "<< endl;
+    //printVector(Cserial,length);
+    cout<<endl;
+
+    //============================================================================
+    switch (op)
+    {
+      case 1:
+              cout<<"==============================================================="<<endl;
+              cout<<"Parallel result"<<endl;
+              start = clock();
+              convolutionCall(A,Cparallel,mask,mask_length,length);
+              finish = clock();
+              elapsedParallel = (((double) (finish - start)) / CLOCKS_PER_SEC );
+              cout<< "The parallel process took: " << elapsedParallel << " seconds to execute "<< endl;
+              optimization = elapsedSecuential/elapsedParallel;
+              cout<< "The acceleration we've got: " << optimization <<endl;
+              //printVector(Cparallel,length);
+              compareVector(Cserial,Cparallel,length);
+              cout<<endl;
+              break;
+
+      case 2:
+              cout<<"==============================================================="<<endl;
+              cout<<"Parallel with constant memory"<<endl;
+              start = clock();
+              convolutionCallConstant(A,CparallelConstant,mask,mask_length,length);
+              finish = clock();
+              elapsedParallelConstant = (((double) (finish - start)) / CLOCKS_PER_SEC );
+              cout<< "The parallel process took: " << elapsedParallelConstant << " seconds to execute "<< endl;
+              optimization = elapsedSecuential/elapsedParallelConstant;
+              cout<< "The acceleration we've got: " << optimization <<endl;
+              //printVector(CparallelConstant,length);
+              compareVector(Cserial,CparallelConstant,length);
+              cout<<endl;
+              break;
+
+      case 3:
+              cout<<"==============================================================="<<endl;
+              cout<<"Parallel with shared memory result"<<endl;
+              start = clock();
+              convolutionCallWithTilesComplex(A,CparallelWithTilesComplex,mask,mask_length,length);
+              finish = clock();
+              elapsedParallelSharedComplex = (((double) (finish - start)) / CLOCKS_PER_SEC );
+              cout<< "The parallel process took: " << elapsedParallelSharedComplex << " seconds to execute "<< endl;
+              optimization = elapsedSecuential/elapsedParallelSharedComplex;
+              cout<< "The acceleration we've got: " << optimization <<endl;
+              //printVector(CparallelWithTilesComplex,length);
+              compareVector(Cserial,CparallelWithTilesComplex,length);
+              cout<<endl;
+              break;
+      case 4:
+              cout<<"==============================================================="<<endl;
+              cout<<"Parallel with shared memory result simplified"<<endl;
+              start = clock();
+              convolutionCallWithTiles(A,CparallelWithTiles,mask,mask_length,length);
+              finish = clock();
+              elapsedParallelSharedTiles = (((double) (finish - start)) / CLOCKS_PER_SEC );
+              cout<< "The parallel process took: " << elapsedParallelSharedTiles << " seconds to execute "<< endl;
+              optimization = elapsedSecuential/elapsedParallelSharedTiles;
+              cout<< "The acceleration we've got: " << optimization <<endl;
+              //printVector(CparallelWithTiles,length);
+              compareVector(Cserial,CparallelWithTiles,length);
+              cout<<endl;
+              break;
+    }
+
+
+    free(A);
+    free(mask);
+    free(Cserial);
+    free(Cparallel);
+    free(CparallelWithTiles);
+    free(CparallelConstant);
+    free(CparallelWithTilesComplex);
   }
-
-
-  free(A);
-  free(mask);
-  free(Cserial);
-  free(Cparallel);
-  free(CparallelWithTiles);
-  free(CparallelConstant);
-  free(CparallelWithTilesComplex);
 }
