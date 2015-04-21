@@ -6,7 +6,7 @@
 #include<cv.h>
 
 #define Mask_size  3
-#define TILE_SIZE  1024
+#define TILE_SIZE  32
 #define BLOCK_SIZE 32
 __constant__ char M[Mask_size*Mask_size];
 //#define clamp(x) (min(max((x), 0.0), 1.0))
@@ -30,7 +30,7 @@ __device__ unsigned char clamp(int value)//__device__ because it's called by a k
 
 //============= CONVOLUTION KERNEL WITH GLOBAL MEM ============================
 
-__global__ void convolution2DGlobalMemKernel(unsigned char *In,char *M, unsigned char *Out,int Mask_Width,int Rowimg,int Colimg)
+__global__ void convolution2DGlobalMemKernel(unsigned char *In,char *Mask, unsigned char *Out,int Mask_Width,int Rowimg,int Colimg)
 {
 
    unsigned int row = blockIdx.y*blockDim.y+threadIdx.y;
@@ -48,7 +48,7 @@ __global__ void convolution2DGlobalMemKernel(unsigned char *In,char *M, unsigned
         if((N_start_point_col + j >=0 && N_start_point_col + j < Rowimg)
         &&(N_start_point_row + i >=0 && N_start_point_row + i < Colimg))
         {
-          Pvalue += In[(N_start_point_row + i)*Rowimg+(N_start_point_col + j)] * M[i*Mask_Width+j];
+          Pvalue += In[(N_start_point_row + i)*Rowimg+(N_start_point_col + j)] * Mask[i*Mask_Width+j];
         }
        }
    }
@@ -82,6 +82,48 @@ __global__ void convolution2DConstantMemKernel(unsigned char *In,unsigned char *
     }
 
    Out[row*Rowimg+col] = clamp(Pvalue);
+}
+
+//============== CONVOLUTION KERNEL WITH SHARED MEM =========================
+
+__global__ void convolution2DSharedMemKernel(unsigned char *imageInput,unsigned char *imageOutput,
+ int maskWidth, int width, int height)
+{
+    __shared__ float N_ds[TILE_SIZE + Mask_size - 1][TILE_SIZE + Mask_size - 1];
+    int n = maskWidth/2;
+    int dest = threadIdx.y*TILE_SIZE+threadIdx.x, destY = dest / (TILE_SIZE+Mask_size-1), destX = dest % (TILE_SIZE+Mask_size-1),
+        srcY = blockIdx.y * TILE_SIZE + destY - n, srcX = blockIdx.x * TILE_SIZE + destX - n,
+        src = (srcY * width + srcX);
+    if (srcY >= 0 && srcY < height && srcX >= 0 && srcX < width)
+        N_ds[destY][destX] = imageInput[src];
+    else
+        N_ds[destY][destX] = 0;
+
+    // Second batch loading
+    dest = threadIdx.y * TILE_SIZE + threadIdx.x + TILE_SIZE * TILE_SIZE;
+    destY = dest /(TILE_SIZE + Mask_size - 1), destX = dest % (TILE_SIZE + Mask_size - 1);
+    srcY = blockIdx.y * TILE_SIZE + destY - n;
+    srcX = blockIdx.x * TILE_SIZE + destX - n;
+    src = (srcY * width + srcX);
+    if (destY < TILE_SIZE + Mask_size - 1)
+    {
+        if (srcY >= 0 && srcY < height && srcX >= 0 && srcX < width)
+            N_ds[destY][destX] = imageInput[src];
+        else
+            N_ds[destY][destX] = 0;
+    }
+    __syncthreads();
+
+    int Pvalue = 0;
+    int y, x;
+    for (y = 0; y < maskWidth; y++)
+        for (x = 0; x < maskWidth; x++)
+            Pvalue += N_ds[threadIdx.y + y][threadIdx.x + x] * M[y * maskWidth + x];
+    y = blockIdx.y * TILE_SIZE + threadIdx.y;
+    x = blockIdx.x * TILE_SIZE + threadIdx.x;
+    if (y < height && x < width)
+        imageOutput[(y * width + x)] = clamp(Pvalue);
+    __syncthreads();
 }
 
 //============ KERNEL CALL =====================================================
@@ -119,7 +161,9 @@ void convolution2DKernelCall(Mat image,unsigned char *In,unsigned char *Out,char
     convolution2DConstantMemKernel<<<dimGrid,dimBlock>>>(d_In,d_Out,Mask_Width,Row,Col);
     break;
     case 3:
-    cout<<"2D convolution using SHARED mem... Soon"<<endl;
+    cout<<"2D convolution using SHARED mem"<<endl;
+    convolution2DSharedMemKernel<<<dimGrid,dimBlock>>>(d_In,d_Out,Mask_Width,Row,Col);
+    break;
   }
 
   cudaDeviceSynchronize();
@@ -142,6 +186,7 @@ int main()
   int Mask_Width =  Mask_size;
   Mat image;
   image = imread("inputs/img4.jpg",0);   // Read the file, 0 means we already load de image in gray scale
+  int op = 3;
   Size s = image.size();
   int Row = s.width;
   int Col = s.height;
@@ -162,7 +207,7 @@ int main()
 
   cout<<"Parallel result"<<endl;
   start = clock();
-  convolution2DKernelCall(image,img,imgOut,h_Mask,Mask_Width,Row,Col,2);
+  convolution2DKernelCall(image,img,imgOut,h_Mask,Mask_Width,Row,Col,op);
   finish = clock();
   elapsedParallel = (((double) (finish - start)) / CLOCKS_PER_SEC );
   cout<< "The parallel process took: " << elapsedParallel << " seconds to execute "<< endl;
@@ -178,7 +223,7 @@ int main()
 
 
   Mat gray_image;
-  gray_image.create(Row,Col,CV_8UC1);
+  gray_image.create(Col,Row,CV_8UC1);
   gray_image.data = imgOut;
   imwrite("./outputs/1053823121.png",gray_image);
   //Wilson if youŕe gonna use this code change the name of the image for your code
