@@ -15,7 +15,9 @@ using namespace std;
 using namespace cv;
 
 
-__device__ unsigned char delimit(int value)//__device__ because it's called by a kernel
+//============ TO HOLD THE VALUES AND DON LET THEM GET OUT OF THE DOMAIN =======
+
+__device__ unsigned char clamp(int value)//__device__ because it's called by a kernel
 {
     if(value < 0)
         value = 0;
@@ -26,6 +28,7 @@ __device__ unsigned char delimit(int value)//__device__ because it's called by a
 }
 
 
+//============= CONVOLUTION KERNEL WITH GLOBAL MEM ============================
 
 __global__ void convolution2DGlobalMemKernel(unsigned char *In,char *M, unsigned char *Out,int Mask_Width,int Rowimg,int Colimg)
 {
@@ -49,9 +52,11 @@ __global__ void convolution2DGlobalMemKernel(unsigned char *In,char *M, unsigned
        }
    }
 
-   Out[row*Rowimg+col] = delimit(Pvalue);
+   Out[row*Rowimg+col] = clamp(Pvalue);
 
 }
+
+//============== CONVOLUTION KERNEL WITH CONSTANT MEM =========================
 
 __global__ void convolution2DConstantMemKernel(unsigned char *In,unsigned char *Out,int Mask_Width,int Rowimg,int Colimg)
  {
@@ -74,8 +79,10 @@ __global__ void convolution2DConstantMemKernel(unsigned char *In,unsigned char *
        }
     }
 
-   Out[row*Rowimg+col] = delimit(Pvalue);
+   Out[row*Rowimg+col] = clamp(Pvalue);
 }
+
+//============ KERNEL CALL =====================================================
 
 void convolution2DKernelCall(Mat image,unsigned char *In,unsigned char *Out,char *h_Mask,
   int Mask_Width,int Row,int Col, int op)
@@ -99,7 +106,7 @@ void convolution2DKernelCall(Mat image,unsigned char *In,unsigned char *Out,char
 
   dim3 dimGrid(ceil(Row/Blocksize),ceil(Col/Blocksize),1);
   dim3 dimBlock(Blocksize,Blocksize,1);
-  switch(op)
+  switch(op)//to select which kernel we want to execute alongside the Secuential version
   {
     case 1:
     cout<<"2D convolution using GLOBAL mem"<<endl;
@@ -142,8 +149,15 @@ int main()
   unsigned char *img = (unsigned char*)malloc(sizeof(unsigned char)*Row*Col*image.channels());
   unsigned char *imgOut = (unsigned char*)malloc(sizeof(unsigned char)*Row*Col*image.channels());
 
-  img = image.data;
+  if( !image.data )
+  {
+    cout<<"Problems loading the image"<<endl;
+    return -1;
+  }//To test out if the image was loaded properly
 
+  img = image.data;
+  //According to the Opencv guide it applies a blur to the image to reduce noise
+  GaussianBlur( img, img, Size(3,3), 0, 0, BORDER_DEFAULT );
 
   cout<<"Parallel result"<<endl;
   start = clock();
