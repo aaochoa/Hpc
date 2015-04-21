@@ -146,8 +146,9 @@ int main()
   char h_Mask[] = {-1,0,1,-2,0,2,-1,0,1}; // A kernel for edge detection
   //another mask option could be {-1,-2,-1,0,0,0,1,2,1} if you want to use this filter in the Y axis
 
-  unsigned char *img = (unsigned char*)malloc(sizeof(unsigned char)*Row*Col*image.channels());
-  unsigned char *imgOut = (unsigned char*)malloc(sizeof(unsigned char)*Row*Col*image.channels());
+  //image.channels() don't needed because the image is already in gray scale
+  unsigned char *img = (unsigned char*)malloc(sizeof(unsigned char)*Row*Col);
+  unsigned char *imgOut = (unsigned char*)malloc(sizeof(unsigned char)*Row*Col);
 
   if( !image.data )
   {
@@ -167,11 +168,11 @@ int main()
   cout<< "The parallel process took: " << elapsedParallel << " seconds to execute "<< endl;
 
   cout<<"Serial result"<<endl;
-  Mat grad_x, abs_grad_x;
+  Mat grad_x;
   start = clock();
   Sobel(image,grad_x,CV_8UC1,1,0,3,1,0,BORDER_DEFAULT);
-  convertScaleAbs(grad_x, abs_grad_x);
   finish = clock();
+  //imwrite("./outputs/1053823121.png",grad_x);
   elapsedSecuential = (((double) (finish - start)) / CLOCKS_PER_SEC );
   cout<< "The Secuential process took: " << elapsedSecuential << " seconds to execute "<< endl;
 
@@ -182,8 +183,6 @@ int main()
   imwrite("./outputs/1053823121.png",gray_image);
   //Wilson if youŕe gonna use this code change the name of the image for your code
 
-  //free(img);
-  //free(imgOut);
 
   return 0;
 }
