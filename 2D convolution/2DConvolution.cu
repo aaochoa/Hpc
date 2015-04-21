@@ -45,7 +45,8 @@ __global__ void convolution2DGlobalMemKernel(unsigned char *In,char *M, unsigned
    {
        for(int j = 0; j < Mask_Width; j++ )
        {
-        if((N_start_point_col + j >=0 && N_start_point_col + j < Rowimg)&&(N_start_point_row + i >=0 && N_start_point_row + i < Colimg))
+        if((N_start_point_col + j >=0 && N_start_point_col + j < Rowimg)
+        &&(N_start_point_row + i >=0 && N_start_point_row + i < Colimg))
         {
           Pvalue += In[(N_start_point_row + i)*Rowimg+(N_start_point_col + j)] * M[i*Mask_Width+j];
         }
@@ -72,7 +73,8 @@ __global__ void convolution2DConstantMemKernel(unsigned char *In,unsigned char *
    {
        for(int j = 0; j < Mask_Width; j++ )
        {
-         if((N_start_point_col + j >=0 && N_start_point_col + j < Rowimg)&&(N_start_point_row + i >=0 && N_start_point_row + i < Colimg))
+         if((N_start_point_col + j >=0 && N_start_point_col + j < Rowimg)
+         &&(N_start_point_row + i >=0 && N_start_point_row + i < Colimg))
          {
            Pvalue += In[(N_start_point_row + i)*Rowimg+(N_start_point_col + j)] * M[i*Mask_Width+j];
          }
@@ -139,7 +141,7 @@ int main()
   double elapsedSecuential;
   int Mask_Width =  Mask_size;
   Mat image;
-  image = imread("inputs/img1.jpg",0);   // Read the file, 0 means we already load de image in gray scale
+  image = imread("inputs/img4.jpg",0);   // Read the file, 0 means we already load de image in gray scale
   Size s = image.size();
   int Row = s.width;
   int Col = s.height;
@@ -147,22 +149,20 @@ int main()
   //another mask option could be {-1,-2,-1,0,0,0,1,2,1} if you want to use this filter in the Y axis
 
   //image.channels() don't needed because the image is already in gray scale
-  unsigned char *img = (unsigned char*)malloc(sizeof(unsigned char)*Row*Col);
-  unsigned char *imgOut = (unsigned char*)malloc(sizeof(unsigned char)*Row*Col);
+  unsigned char *img = (unsigned char*)malloc(sizeof(unsigned char)*Row*Col*image.channels());
+  unsigned char *imgOut = (unsigned char*)malloc(sizeof(unsigned char)*Row*Col*image.channels());
 
   if( !image.data )
-  {
+  {//To test out if the image was loaded properly
     cout<<"Problems loading the image"<<endl;
     return -1;
-  }//To test out if the image was loaded properly
+  }
 
   img = image.data;
-  //According to the Opencv guide it applies a blur to the image to reduce noise
-  GaussianBlur( img, img, Size(3,3), 0, 0, BORDER_DEFAULT );
 
   cout<<"Parallel result"<<endl;
   start = clock();
-  convolution2DKernelCall(image,img,imgOut,h_Mask,Mask_Width,Row,Col,1);
+  convolution2DKernelCall(image,img,imgOut,h_Mask,Mask_Width,Row,Col,2);
   finish = clock();
   elapsedParallel = (((double) (finish - start)) / CLOCKS_PER_SEC );
   cout<< "The parallel process took: " << elapsedParallel << " seconds to execute "<< endl;
@@ -182,7 +182,6 @@ int main()
   gray_image.data = imgOut;
   imwrite("./outputs/1053823121.png",gray_image);
   //Wilson if youŕe gonna use this code change the name of the image for your code
-
 
   return 0;
 }
