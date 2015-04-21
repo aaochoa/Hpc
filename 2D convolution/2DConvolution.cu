@@ -5,11 +5,12 @@
 #include<highgui.h>
 #include<cv.h>
 
-#define N_elements 32
 #define Mask_size  3
 #define TILE_SIZE  1024
 #define BLOCK_SIZE 32
 __constant__ char M[Mask_size*Mask_size];
+//#define clamp(x) (min(max((x), 0.0), 1.0))
+
 using namespace std;
 using namespace cv;
 
@@ -76,10 +77,12 @@ __global__ void convolution2DConstantMemKernel(unsigned char *In,unsigned char *
    Out[row*Rowimg+col] = delimit(Pvalue);
 }
 
-void convolution2DGlobalMemKernelCall(Mat image,unsigned char *In,unsigned char *Out,char *h_Mask,int Mask_Width,int Row,int Col){
+void convolution2DKernelCall(Mat image,unsigned char *In,unsigned char *Out,char *h_Mask,
+  int Mask_Width,int Row,int Col, int op)
+{
   // Variables
   int Size_of_bytes =  sizeof(unsigned char)*Row*Col*image.channels();
-  int Mask_size_bytes =  sizeof(char)*9;
+  int Mask_size_bytes =  sizeof(char)*(Mask_size*Mask_size);
   unsigned char *d_In, *d_Out;
   char *d_Mask;
   float Blocksize=BLOCK_SIZE;
@@ -91,12 +94,24 @@ void convolution2DGlobalMemKernelCall(Mat image,unsigned char *In,unsigned char 
   cudaMalloc((void**)&d_Mask,Mask_size_bytes);
   // Memcpy Host to device
   cudaMemcpy(d_In,In,Size_of_bytes,cudaMemcpyHostToDevice);
-  cudaMemcpy(d_Out,Out,Size_of_bytes,cudaMemcpyHostToDevice);
   cudaMemcpy(d_Mask,h_Mask,Mask_size_bytes,cudaMemcpyHostToDevice);
+  cudaMemcpyToSymbol(M,h_Mask,Mask_size_bytes);// Using constant mem
 
   dim3 dimGrid(ceil(Row/Blocksize),ceil(Col/Blocksize),1);
   dim3 dimBlock(Blocksize,Blocksize,1);
-  convolution2DGlobalMemKernel<<<dimGrid,dimBlock>>>(d_In,d_Mask,d_Out,Mask_Width,Row,Col);
+  switch(op)
+  {
+    case 1:
+    cout<<"2D convolution using GLOBAL mem"<<endl;
+    convolution2DGlobalMemKernel<<<dimGrid,dimBlock>>>(d_In,d_Mask,d_Out,Mask_Width,Row,Col);
+    break;
+    case 2:
+    cout<<"2D convolution using CONSTANT mem"<<endl;
+    convolution2DConstantMemKernel<<<dimGrid,dimBlock>>>(d_In,d_Out,Mask_Width,Row,Col);
+    break;
+    case 3:
+    cout<<"2D convolution using SHARED mem... Soon"<<endl;
+  }
 
   cudaDeviceSynchronize();
   // save output result.
@@ -107,74 +122,45 @@ void convolution2DGlobalMemKernelCall(Mat image,unsigned char *In,unsigned char 
   cudaFree(d_Mask);
 }
 
-void convolution2DConstantMemKernelCall(Mat image,unsigned char *In,unsigned char *Out,char *h_Mask,int Mask_Width,int Row,int Col){
-  // Variables
-  int Size_of_bytes =  sizeof(unsigned char)*Row*Col*image.channels();
-  int Mask_size_bytes =  sizeof(char)*9;
-  unsigned char *d_In, *d_Out;
-  char *d_Mask;
-  float Blocksize=BLOCK_SIZE;
 
-
-  // Memory Allocation in device
-  cudaMalloc((void**)&d_In,Size_of_bytes);
-  cudaMalloc((void**)&d_Out,Size_of_bytes);
-  cudaMalloc((void**)&d_Mask,Mask_size_bytes);
-  // Memcpy Host to device
-  cudaMemcpy(d_In,In,Size_of_bytes,cudaMemcpyHostToDevice);
-  cudaMemcpy(d_Out,Out,Size_of_bytes,cudaMemcpyHostToDevice);
-  cudaMemcpyToSymbol(M,h_Mask,Mask_size_bytes);
-  dim3 dimGrid(ceil(Row/Blocksize),ceil(Col/Blocksize),1);
-  dim3 dimBlock(Blocksize,Blocksize,1);
-  convolution2DConstantMemKernel<<<dimGrid,dimBlock>>>(d_In,d_Out,Mask_Width,Row,Col);
-
-  cudaDeviceSynchronize();
-  // save output result.
-  cudaMemcpy (Out,d_Out,Size_of_bytes,cudaMemcpyDeviceToHost);
-  // Free device memory
-  cudaFree(d_In);
-  cudaFree(d_Out);
-}
 
 int main()
 {
 
   clock_t start, finish; //Clock variables
-  double elapsedParallel,elapsedParallelConstant;
+  double elapsedParallel;
+  double elapsedSecuential;
   int Mask_Width =  Mask_size;
-  int op = 2; // To select which parallel version we want to execute
   Mat image;
-  image = imread("inputs/img1.jpg",0);   // Read the file
+  image = imread("inputs/img1.jpg",0);   // Read the file, 0 means we already load de image in gray scale
   Size s = image.size();
   int Row = s.width;
   int Col = s.height;
-  char h_Mask[] = {-1,-1,-1,0,0,0,1,1,1}; // A kernel for edge detection
+  char h_Mask[] = {-1,0,1,-2,0,2,-1,0,1}; // A kernel for edge detection
+  //another mask option could be {-1,-2,-1,0,0,0,1,2,1} if you want to use this filter in the Y axis
+
   unsigned char *img = (unsigned char*)malloc(sizeof(unsigned char)*Row*Col*image.channels());
   unsigned char *imgOut = (unsigned char*)malloc(sizeof(unsigned char)*Row*Col*image.channels());
 
   img = image.data;
 
-  switch (op)
-  {
-    case 1:
-          cout<<"Parallel result basic kernel"<<endl;
-          start = clock();
-          convolution2DGlobalMemKernelCall(image,img,imgOut,h_Mask,Mask_Width,Row,Col);
-          finish = clock();
-          elapsedParallel = (((double) (finish - start)) / CLOCKS_PER_SEC );
-          cout<< "The Secuential process took: " << elapsedParallel << " seconds to execute "<< endl;
-          break;
 
-    case 2:
-          cout<<"Parallel result with constant mem"<<endl;
-          start = clock();
-          convolution2DConstantMemKernelCall(image,img,imgOut,h_Mask,Mask_Width,Row,Col);
-          finish = clock();
-          elapsedParallelConstant = (((double) (finish - start)) / CLOCKS_PER_SEC );
-          cout<< "The Secuential process took: " << elapsedParallelConstant << " seconds to execute "<< endl;
-          break;
+  cout<<"Parallel result"<<endl;
+  start = clock();
+  convolution2DKernelCall(image,img,imgOut,h_Mask,Mask_Width,Row,Col,1);
+  finish = clock();
+  elapsedParallel = (((double) (finish - start)) / CLOCKS_PER_SEC );
+  cout<< "The parallel process took: " << elapsedParallel << " seconds to execute "<< endl;
 
-  }
+  cout<<"Serial result"<<endl;
+  Mat grad_x, abs_grad_x;
+  start = clock();
+  Sobel(image,grad_x,CV_8UC1,1,0,3,1,0,BORDER_DEFAULT);
+  convertScaleAbs(grad_x, abs_grad_x);
+  finish = clock();
+  elapsedSecuential = (((double) (finish - start)) / CLOCKS_PER_SEC );
+  cout<< "The Secuential process took: " << elapsedSecuential << " seconds to execute "<< endl;
+
 
   Mat gray_image;
   gray_image.create(Row,Col,CV_8UC1);
