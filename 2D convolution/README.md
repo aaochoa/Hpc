@@ -1,8 +1,14 @@
 <h1>2D Convolution + Sobel filter</h1>
-<h2>Overview</h2>
 <p>Here's an implementation of the Sobel filter and a 2D convolution using CUDA C and OpenCV. Also there are three different parallel implementations
-using global memmory, constant memory and shared memory</p>
-<h3>Computer specs</h3>
+using global memmory, constant memory and shared memory.
+</p>
+<h2>Example</h2>
+<p><img src="Images /Source/img1.jpg" alt="Execution" /></p>
+<p>Original image</p>
+<p><img src="Images /Serial/SerialImg1.png" alt="Results" /></p>
+<p>Filtered image using the Sobel filter</p>
+<br>
+<h2>Computer specs</h2>
 <p>&#8594; <span class="caps">CPU</span> </p>
 <ul>
 	<li>processor       : 1</li>
@@ -27,7 +33,3 @@ using global memmory, constant memory and shared memory</p>
 	<li>Max block dimensions: [ 1024, 1024, 64 ]</li>
 	<li>Max grid dimensions:  [ 2147483647, 65535, 65535 ]</li>
 </ul>
-<h2>Example</h2>
-<p><img src="Images /Source/img1.jpg" alt="Execution" /></p>
-<p></p>
-<p><img src="Images /Serial/SerialImg1.png" alt="Results" /></p>
