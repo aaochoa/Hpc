@@ -28,6 +28,6 @@ using global memmory, constant memory and shared memory</p>
 	<li>Max grid dimensions:  [ 2147483647, 65535, 65535 ]</li>
 </ul>
 <h2>Example</h2>
-<p><img src="Images/Source/img1.jpg" alt="Execution" /></p>
+<p><img src="Images /Source/img1.jpg" alt="Execution" /></p>
 <p></p>
-<p><img src="Images/Serial/SerialImg1.png" alt="Results" /></p>
+<p><img src="Images /Serial/SerialImg1.png" alt="Results" /></p>
