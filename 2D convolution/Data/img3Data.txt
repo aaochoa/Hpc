@@ -1,0 +1,121 @@
+Iteration: 0
+The Secuential process took: 0.011228 seconds to execute
+2D convolution using GLOBAL mem
+The parallel process took: 0.196772 seconds to execute
+The acceleration  : 0.057061X
+2D convolution using CONSTANT mem
+The parallel process took: 0.001357 seconds to execute
+The acceleration  : 8.27413X
+2D convolution using SHARED mem
+The parallel process took: 0.001358 seconds to execute
+The acceleration  : 8.26804X
+Iteration: 1
+The Secuential process took: 0.010821 seconds to execute
+2D convolution using GLOBAL mem
+The parallel process took: 0.001657 seconds to execute
+The acceleration  : 6.53048X
+2D convolution using CONSTANT mem
+The parallel process took: 0.001343 seconds to execute
+The acceleration  : 8.05733X
+2D convolution using SHARED mem
+The parallel process took: 0.001357 seconds to execute
+The acceleration  : 7.97421X
+Iteration: 2
+The Secuential process took: 0.010808 seconds to execute
+2D convolution using GLOBAL mem
+The parallel process took: 0.001657 seconds to execute
+The acceleration  : 6.52263X
+2D convolution using CONSTANT mem
+The parallel process took: 0.001343 seconds to execute
+The acceleration  : 8.04765X
+2D convolution using SHARED mem
+The parallel process took: 0.001357 seconds to execute
+The acceleration  : 7.96463X
+Iteration: 3
+The Secuential process took: 0.010803 seconds to execute
+2D convolution using GLOBAL mem
+The parallel process took: 0.001656 seconds to execute
+The acceleration  : 6.52355X
+2D convolution using CONSTANT mem
+The parallel process took: 0.00134 seconds to execute
+The acceleration  : 8.06194X
+2D convolution using SHARED mem
+The parallel process took: 0.001355 seconds to execute
+The acceleration  : 7.97269X
+Iteration: 4
+The Secuential process took: 0.010794 seconds to execute
+2D convolution using GLOBAL mem
+The parallel process took: 0.001663 seconds to execute
+The acceleration  : 6.49068X
+2D convolution using CONSTANT mem
+The parallel process took: 0.001353 seconds to execute
+The acceleration  : 7.97783X
+2D convolution using SHARED mem
+The parallel process took: 0.001368 seconds to execute
+The acceleration  : 7.89035X
+Iteration: 5
+The Secuential process took: 0.010826 seconds to execute
+2D convolution using GLOBAL mem
+The parallel process took: 0.001706 seconds to execute
+The acceleration  : 6.34584X
+2D convolution using CONSTANT mem
+The parallel process took: 0.00134 seconds to execute
+The acceleration  : 8.0791X
+2D convolution using SHARED mem
+The parallel process took: 0.001357 seconds to execute
+The acceleration  : 7.97789X
+Iteration: 6
+The Secuential process took: 0.010795 seconds to execute
+2D convolution using GLOBAL mem
+The parallel process took: 0.001691 seconds to execute
+The acceleration  : 6.3838X
+2D convolution using CONSTANT mem
+The parallel process took: 0.001358 seconds to execute
+The acceleration  : 7.94919X
+2D convolution using SHARED mem
+The parallel process took: 0.001371 seconds to execute
+The acceleration  : 7.87381X
+Iteration: 7
+The Secuential process took: 0.010804 seconds to execute
+2D convolution using GLOBAL mem
+The parallel process took: 0.001654 seconds to execute
+The acceleration  : 6.53204X
+2D convolution using CONSTANT mem
+The parallel process took: 0.001335 seconds to execute
+The acceleration  : 8.09288X
+2D convolution using SHARED mem
+The parallel process took: 0.001356 seconds to execute
+The acceleration  : 7.96755X
+Iteration: 8
+The Secuential process took: 0.01087 seconds to execute
+2D convolution using GLOBAL mem
+The parallel process took: 0.001757 seconds to execute
+The acceleration  : 6.18668X
+2D convolution using CONSTANT mem
+The parallel process took: 0.00136 seconds to execute
+The acceleration  : 7.99265X
+2D convolution using SHARED mem
+The parallel process took: 0.001369 seconds to execute
+The acceleration  : 7.9401X
+Iteration: 9
+The Secuential process took: 0.010825 seconds to execute
+2D convolution using GLOBAL mem
+The parallel process took: 0.001656 seconds to execute
+The acceleration  : 6.53684X
+2D convolution using CONSTANT mem
+The parallel process took: 0.001335 seconds to execute
+The acceleration  : 8.10861X
+2D convolution using SHARED mem
+The parallel process took: 0.001361 seconds to execute
+The acceleration  : 7.95371X
+Iteration: 10
+The Secuential process took: 0.010772 seconds to execute
+2D convolution using GLOBAL mem
+The parallel process took: 0.001692 seconds to execute
+The acceleration  : 6.36643X
+2D convolution using CONSTANT mem
+The parallel process took: 0.001355 seconds to execute
+The acceleration  : 7.94982X
+2D convolution using SHARED mem
+The parallel process took: 0.001358 seconds to execute
+The acceleration  : 7.93225X
